@@ -22,6 +22,7 @@ class RoomTempPlugin(octoprint.plugin.StartupPlugin,
 		self.isRaspi = False
 		self.displayRoomTemp = True
 		self._checkTempTimer = None
+		self.displayInFahrenheit = False
 
 	def on_after_startup(self):
 		self.displayRoomTemp = self._settings.get(["displayRoomTemp"])
@@ -32,7 +33,7 @@ class RoomTempPlugin(octoprint.plugin.StartupPlugin,
 			# Match a line like 'Hardware   : BCM2709'
 			match = re.search('^Hardware\s+:\s+(\w+)$', cpuinfo, flags=re.MULTILINE | re.IGNORECASE)
 
-			if match.group(1) == 'BCM2708' or match.group(1) == 'BCM2709':
+			if match.group(1) == 'BCM2708' or match.group(1) == 'BCM2709' or match.group(1) == 'BCM2835':
 				self.isRaspi = True
 			else:
 				self.isRaspi = False
@@ -62,7 +63,10 @@ class RoomTempPlugin(octoprint.plugin.StartupPlugin,
 			equals_pos = lines[1].find('t=')
 			if equals_pos != -1:
 				temp_string = lines[1][equals_pos+2:]
-				temp_c = float(temp_string) / 1000.0
+				if self.displayInFahrenheit == True:
+					temp_c = 9.0/5.0 * float(temp_string) + 32
+				else:
+					temp_c = float(temp_string) / 1000.0
 				p = '{0:0.1f}'.format(temp_c)
 
 			self._plugin_manager.send_plugin_message(self._identifier, dict(israspi=self.isRaspi, roomtemp=p))
@@ -71,12 +75,13 @@ class RoomTempPlugin(octoprint.plugin.StartupPlugin,
 
 	##~~ SettingsPlugin
 	def get_settings_defaults(self):
-		return dict(displayRoomTemp = self.displayRoomTemp)
+		return dict(displayRoomTemp = self.displayRoomTemp,displayInFahrenheit = self.displayInFahrenheit)
 
 	def on_settings_save(self, data):
 		octoprint.plugin.SettingsPlugin.on_settings_save(self, data)
 
 		self.displayRoomTemp = self._settings.get(["displayRoomTemp"])
+		self.displayInFahrenheit = self._settings.get(["displayInFahrenheit"])
 
 		if self.displayRoomTemp:
 			interval = 30.0
@@ -115,12 +120,12 @@ class RoomTempPlugin(octoprint.plugin.StartupPlugin,
 
 				# version check: github repository
 				type="github_release",
-				user="looma",
+				user="jaycollett",
 				repo="OctoPrint-roomTemp",
 				current=self._plugin_version,
 
 				# update method: pip w/ dependency links
-				pip="https://github.com/looma/OctoPrint-roomTemp/archive/{target_version}.zip"
+				pip="https://github.com/jaycollett/OctoPrint-roomTemp/archive/{target_version}.zip"
 			)
 		)
 
