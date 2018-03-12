@@ -6,7 +6,8 @@ $(function() {
         self.global_settings = parameters[1];
         self.roomTemp = ko.observable();
         self.isRaspi = ko.observable(false);
-
+		self.displayInFahrenheit = ko.observable(false);
+		
         self.onBeforeBinding = function () {
             self.settings = self.global_settings.settings.plugins.roomtemp;
         };
@@ -22,8 +23,8 @@ $(function() {
             } else {
                 self.isRaspi(true);
             }
-
-            self.roomTemp(_.sprintf("Room: %.1f&deg;c", data.roomtemp));
+			
+			self.roomTemp(_.sprintf("Room Temp: %.1f&deg;", data.roomtemp));
         };
     }
 

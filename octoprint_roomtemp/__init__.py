@@ -64,12 +64,12 @@ class RoomTempPlugin(octoprint.plugin.StartupPlugin,
 			if equals_pos != -1:
 				temp_string = lines[1][equals_pos+2:]
 				if self.displayInFahrenheit == True:
-					temp_c = 9.0/5.0 * float(temp_string) + 32
+					temp_c = (((float(temp_string) / 1000.0) * 9.0) / 5.0) + 32
 				else:
-					temp_c = float(temp_string) / 1000.0
+					temp_c = (float(temp_string) / 1000.0)
 				p = '{0:0.1f}'.format(temp_c)
 
-			self._plugin_manager.send_plugin_message(self._identifier, dict(israspi=self.isRaspi, roomtemp=p))
+			self._plugin_manager.send_plugin_message(self._identifier, dict(israspi=self.isRaspi, roomtemp=p, displayinfahrenheit=self.displayInFahrenheit))
 		else:
 			self._logger.info("No file temperature found !!")
 
